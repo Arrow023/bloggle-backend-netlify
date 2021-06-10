@@ -16,11 +16,14 @@ using Microsoft.Owin.Security.OAuth;
 using Bloggle.Models;
 using Bloggle.Providers;
 using Bloggle.Results;
+using Bloggle.BusinessLayer;
+using System.Web.Http.Cors;
 
 namespace Bloggle.Controllers
 {
     [Authorize]
-    [RoutePrefix("api/Account")]
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [RoutePrefix("api/Account")]  
     public class AccountController : ApiController
     {
         private const string LocalLoginProvider = "Local";
@@ -62,7 +65,8 @@ namespace Bloggle.Controllers
             {
                 Email = User.Identity.GetUserName(),
                 HasRegistered = externalLogin == null,
-                LoginProvider = externalLogin != null ? externalLogin.LoginProvider : null
+                LoginProvider = externalLogin != null ? externalLogin.LoginProvider : null,
+                UserId = User.Identity.GetUserId()
             };
         }
 
@@ -71,7 +75,7 @@ namespace Bloggle.Controllers
         public IHttpActionResult Logout()
         {
             Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
-            return Ok();
+            return Ok("Successfully Logged out");
         }
 
         // GET api/Account/ManageInfo?returnUrl=%2F&generateState=true
@@ -151,6 +155,35 @@ namespace Bloggle.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpPut]
+        [Route("UpdateUser")]
+        public async Task<IHttpActionResult> UpdateUser(UserModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                using (var context = new ApplicationDbContext())
+                {
+                    var store = new UserStore<User>(context);
+                    var manager = new UserManager<User>(store);
+                    User user = new User();
+                   
+                    user = manager.Find(model.UserName, model.Password);
+                    user.About = model.About;
+                    user.Facebook = model.Facebook;
+                    user.Twitter = model.Twitter;
+                    user.Instagram = model.Instagram;
+                    Task.WaitAny(manager.UpdateAsync(user));
+                    Task.WaitAny(context.SaveChangesAsync());
+                    return Ok("Done");
+                }   
+            }
+            else
+            {
+                return InternalServerError();
+            }
+
         }
 
         // POST api/Account/AddExternalLogin
@@ -250,7 +283,7 @@ namespace Bloggle.Controllers
                 return new ChallengeResult(provider, this);
             }
 
-            ApplicationUser user = await UserManager.FindAsync(new UserLoginInfo(externalLogin.LoginProvider,
+            User user = await UserManager.FindAsync(new UserLoginInfo(externalLogin.LoginProvider,
                 externalLogin.ProviderKey));
 
             bool hasRegistered = user != null;
@@ -328,7 +361,12 @@ namespace Bloggle.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+            var user = new User() {
+                UserName = model.UserName,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                DOB = model.DOB,
+                Email = model.Email };
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
 
@@ -337,7 +375,7 @@ namespace Bloggle.Controllers
                 return GetErrorResult(result);
             }
 
-            return Ok();
+            return Ok(user.Id);
         }
 
         // POST api/Account/RegisterExternal
@@ -357,7 +395,7 @@ namespace Bloggle.Controllers
                 return InternalServerError();
             }
 
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+            var user = new User() { UserName = model.Email, Email = model.Email };
 
             IdentityResult result = await UserManager.CreateAsync(user);
             if (!result.Succeeded)

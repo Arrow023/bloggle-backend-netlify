@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Web.Http;
 using Microsoft.Owin.Security.OAuth;
 using Newtonsoft.Json.Serialization;
-
 namespace Bloggle
 {
     public static class WebApiConfig
@@ -21,6 +20,8 @@ namespace Bloggle
             config.Filters.Add(new AuthorizeAttribute());
             // Web API routes
             config.MapHttpAttributeRoutes();
+
+            config.EnableCors();
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
