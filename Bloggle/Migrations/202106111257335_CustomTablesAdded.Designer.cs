@@ -7,13 +7,13 @@ namespace Bloggle.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
-    public sealed partial class CustomTables : IMigrationMetadata
+    public sealed partial class CustomTablesAdded : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(CustomTables));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(CustomTablesAdded));
         
         string IMigrationMetadata.Id
         {
-            get { return "202106100432282_CustomTables"; }
+            get { return "202106111257335_CustomTablesAdded"; }
         }
         
         string IMigrationMetadata.Source

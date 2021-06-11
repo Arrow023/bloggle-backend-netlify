@@ -33,3 +33,7 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+
+
+//Assembly for Log4Net - A logging suite
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]

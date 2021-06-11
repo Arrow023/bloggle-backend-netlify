@@ -10,8 +10,10 @@ using System.Threading.Tasks;
 
 namespace Bloggle.Controllers
 {
+    [RoutePrefix("api/Blog")]
     public class BlogController : ApiController
     {
+        
         public DataAccessService service;
 
         public BlogController()
@@ -20,45 +22,112 @@ namespace Bloggle.Controllers
         }
 
 
-        // GET api/<controller>
-        public IEnumerable<string> Get()
+        // GET api/Blog/feature?blogType=<type>
+        [AllowAnonymous]
+        [Route("feature")]
+        public HttpResponseMessage Get(string blogType, int perPage=12)
         {
-            return new string[] { "value1", "value2" };
+            if (blogType == "latest")
+            {
+                var blogs = service.GetRecentBlogs(perPage);
+                if (blogs == null)
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No blogs found in latest category");
+                else
+                    return Request.CreateResponse(HttpStatusCode.OK,blogs);
+            }
+            else if (blogType == "trending")
+            {
+                var blogs = service.GetTrendingBlogs(perPage);
+                if (blogs == null)
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No blogs found in trending category");
+                else
+                    return Request.CreateResponse(HttpStatusCode.OK, blogs);
+            }
+            else
+            {
+                var blogs = service.GetPopularBlogs(perPage);
+                if (blogs == null)
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No blogs found in Popular category");
+                else
+                    return Request.CreateResponse(HttpStatusCode.OK, blogs);
+            }           
         }
 
-        // GET api/<controller>/5
-        public string Get(int id)
+        //GET api/Blog/category?category=<category>&perPage=<count>
+        [AllowAnonymous]
+        [Route("category")]
+        public HttpResponseMessage GetCategoricalBlog(int category, int perPage = 12)
         {
-            return "value";
+            if (category != 0)
+            {
+                var blogs = service.GetCategoryXBlogs(category, perPage);
+                if (blogs == null)
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"No blogs found in {category}");
+                else
+                    return Request.CreateResponse(HttpStatusCode.OK, blogs);
+            }
+            else
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.NotFound, "Please provide category to search");
+            }
+        }
+
+
+        // GET api/<controller>/5
+        [AllowAnonymous]
+        public HttpResponseMessage Get(int id)
+        {
+            var blog =  service.FindBlog(id);
+            if (blog != null)
+                return Request.CreateResponse(HttpStatusCode.OK, blog);
+            else
+                return Request.CreateErrorResponse(HttpStatusCode.NotFound,$"Blog with Id={id} not found");
         }
 
         // POST api/<controller>
-        public async Task<IHttpActionResult> Post([FromBody]Blog blog)
+        public HttpResponseMessage Post([FromBody]Blog blog)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest,ModelState);
             }
             else
             {
                 var result = service.CreateBlog(blog);
                 if (result != null)
                 {
-                    return Ok(result);
+                    return Request.CreateResponse(HttpStatusCode.OK, blog);
                 }
                 else
-                    return InternalServerError();
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Technical Error occurred");
             }
         }
 
-        // PUT api/<controller>/5
-        public void Put(int id, [FromBody]string value)
+        // PUT api/Blog/5
+        public HttpResponseMessage Put(int id, [FromBody]Blog blog)
         {
+            if(ModelState.IsValid)
+            {
+                var result = service.UpdateBlog(id, blog);
+                if (result != null)
+                    return Request.CreateResponse(HttpStatusCode.OK, result);
+                else
+                    return Request.CreateErrorResponse(HttpStatusCode.NotModified,"Blog is not modified");
+            }
+            else
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
+            }
         }
 
-        // DELETE api/<controller>/5
-        public void Delete(int id)
+        // DELETE api/Blog/5
+        public HttpResponseMessage Delete(int id)
         {
+            var status = service.DeleteBlog(id);
+            if (status)
+                return Request.CreateResponse(HttpStatusCode.OK);
+            else
+                return Request.CreateErrorResponse(HttpStatusCode.NotImplemented, $"An error occurred during deletion of Blog with Id={id}");
         }
     }
 }

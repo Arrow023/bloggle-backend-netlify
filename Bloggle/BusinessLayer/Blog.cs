@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Bloggle.Models;
 
 
@@ -18,17 +19,20 @@ namespace Bloggle.BusinessLayer
         [Required]
         public string Content { get; set; }
         [Required]
-        public int Category { get; set; }
         public string Author { get; set; }
-        public int? Media { get; set; }
+        [Required]
+        public int CategoryId { get; set; }
+        public int? MediaId { get; set; }
         public int Likes { get; set; }
+        [Required]
         public DateTime CreatedTime { get; set; }
+        [Required]
         public DateTime LastUpdatedTime { get; set; }
 
-        public virtual Category Category1 { get; set; }
-        public virtual Medium Medium { get; set; }
-        public virtual ICollection<Bookmark> Bookmarks { get; set; }
-        public virtual ICollection<Comment> Comments { get; set; }
+        [ForeignKey("MediaId")]
+        public virtual Medium MediaNavigator { get; set; }
+        public virtual Category CategoryNavigator { get; set; }
+        public virtual ICollection<Comment> CommentsNavigator { get; set; }
         
     }
 }

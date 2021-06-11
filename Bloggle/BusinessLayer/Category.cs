@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-
+using System.ComponentModel.DataAnnotations;
 namespace Bloggle.BusinessLayer
 {
     public class Category
     {
         public int Id { get; set; }
-        public string Category1 { get; set; }
+        [Required]
+        public string CategoryName { get; set; }
 
-        public virtual ICollection<Blog> Blogs { get; set; }
     }
 }

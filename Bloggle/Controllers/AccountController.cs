@@ -159,7 +159,7 @@ namespace Bloggle.Controllers
 
         [HttpPut]
         [Route("UpdateUser")]
-        public async Task<IHttpActionResult> UpdateUser(UserModel model)
+        public IHttpActionResult UpdateUser(UserModel model)
         {
             if (ModelState.IsValid)
             {
