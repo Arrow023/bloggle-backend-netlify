@@ -96,7 +96,7 @@ namespace Bloggle.Controllers
                 var result = service.CreateBlog(blog);
                 if (result != null)
                 {
-                    return Request.CreateResponse(HttpStatusCode.OK, blog);
+                    return Request.CreateResponse(HttpStatusCode.Created, blog);
                 }
                 else
                     return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Technical Error occurred");
@@ -112,7 +112,7 @@ namespace Bloggle.Controllers
                 if (result != null)
                     return Request.CreateResponse(HttpStatusCode.OK, result);
                 else
-                    return Request.CreateErrorResponse(HttpStatusCode.NotModified,"Blog is not modified");
+                    return Request.CreateErrorResponse(HttpStatusCode.NotImplemented,"Blog is not modified");
             }
             else
             {

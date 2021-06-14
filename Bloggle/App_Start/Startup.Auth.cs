@@ -56,8 +56,8 @@ namespace Bloggle
             //    consumerSecret: "");
 
             //app.UseFacebookAuthentication(
-            //    appId: "",
-            //    appSecret: "");
+            //    appId: "1436606503347895",
+            //    appSecret: "3ae072830a483f0f7ccd02fd8be24cca");
 
             //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
             //{

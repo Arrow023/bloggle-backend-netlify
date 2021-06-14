@@ -165,15 +165,17 @@ namespace Bloggle.Controllers
             {
                 using (var context = new ApplicationDbContext())
                 {
-                    var store = new UserStore<User>(context);
-                    var manager = new UserManager<User>(store);
-                    User user = new User();
-                   
-                    user = manager.Find(model.UserName, model.Password);
+                    var store = new UserStore<ApplicationUser>(context);
+                    var manager = new UserManager<ApplicationUser>(store);
+                    ApplicationUser user = new ApplicationUser();
+
+                    user = manager.FindByEmail(model.Email);
                     user.About = model.About;
+                    user.PhoneNumber = model.PhoneNumber;
                     user.Facebook = model.Facebook;
                     user.Twitter = model.Twitter;
                     user.Instagram = model.Instagram;
+                    user.ProfilePicture = model.ProfilePicture;
                     Task.WaitAny(manager.UpdateAsync(user));
                     Task.WaitAny(context.SaveChangesAsync());
                     return Ok("Done");
@@ -283,7 +285,7 @@ namespace Bloggle.Controllers
                 return new ChallengeResult(provider, this);
             }
 
-            User user = await UserManager.FindAsync(new UserLoginInfo(externalLogin.LoginProvider,
+            ApplicationUser user = await UserManager.FindAsync(new UserLoginInfo(externalLogin.LoginProvider,
                 externalLogin.ProviderKey));
 
             bool hasRegistered = user != null;
@@ -350,7 +352,6 @@ namespace Bloggle.Controllers
 
             return logins;
         }
-
         // POST api/Account/Register
         [AllowAnonymous]
         [Route("Register")]
@@ -361,7 +362,7 @@ namespace Bloggle.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new User() {
+            var user = new ApplicationUser() {
                 UserName = model.UserName,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
@@ -369,11 +370,12 @@ namespace Bloggle.Controllers
                 Email = model.Email };
 
             IdentityResult result = await UserManager.CreateAsync(user, model.Password);
-
+            
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
             }
+            var addToRoleResult = await UserManager.AddToRoleAsync(user.Id, "Blogger");
 
             return Ok(user.Id);
         }
@@ -395,7 +397,7 @@ namespace Bloggle.Controllers
                 return InternalServerError();
             }
 
-            var user = new User() { UserName = model.Email, Email = model.Email };
+            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
 
             IdentityResult result = await UserManager.CreateAsync(user);
             if (!result.Succeeded)

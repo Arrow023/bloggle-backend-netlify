@@ -19,7 +19,7 @@ namespace Bloggle.BusinessLayer
         public string Twitter { get; set; }
         public string Instagram { get; set; }
         public string Facebook { get; set; }
-        public string ProfilePicture { get; set; }
+        public int? ProfilePicture { get; set; }
 
     }
 }
