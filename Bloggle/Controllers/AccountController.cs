@@ -18,11 +18,11 @@ using Bloggle.Providers;
 using Bloggle.Results;
 using Bloggle.BusinessLayer;
 using System.Web.Http.Cors;
+using System.Linq;
 
 namespace Bloggle.Controllers
 {
     [Authorize]
-    [EnableCors(origins: "*", headers: "*", methods: "*")]
     [RoutePrefix("api/Account")]  
     public class AccountController : ApiController
     {
@@ -49,6 +49,17 @@ namespace Bloggle.Controllers
             private set
             {
                 _userManager = value;
+            }
+        }
+
+        [Route("Allusers")]
+        [AllowAnonymous]
+        [HttpGet]
+        public List<string> GetUsernames()
+        {
+            using (ApplicationDbContext db = new ApplicationDbContext())
+            {
+                return db.Users.Select(u => u.UserName).ToList();
             }
         }
 
