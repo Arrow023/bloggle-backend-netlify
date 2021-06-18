@@ -72,6 +72,21 @@ namespace Bloggle.Controllers
             }
         }
 
+        [AllowAnonymous]
+        [Route("blogsOfUser")]
+        public HttpResponseMessage GetBlogsOfUsers(string username)
+        {
+            if (username != null)
+            {
+                var blogs = service.GetBlogsOfUser(username);
+                if (blogs.Count > 0)
+                    return Request.CreateResponse(HttpStatusCode.OK, blogs);
+                else
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No blogs found for the user " + username);
+            }
+            else
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Invalid username");
+        }
 
         // GET api/<controller>/5
         [AllowAnonymous]

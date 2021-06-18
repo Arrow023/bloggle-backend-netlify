@@ -84,6 +84,15 @@ namespace Bloggle.DataAcessLayer
             return blogs;
         }
 
+        public List<Blog> GetBlogsOfUser(string userName)
+        {
+            var blogs = context.Blogs
+                .OrderByDescending(b => b.CreatedTime)
+                .Where(b => b.Author == userName)
+                .ToList();
+            return blogs;
+        }
+
         public Blog UpdateBlog(int blogId, Blog blog)
         {
             try
