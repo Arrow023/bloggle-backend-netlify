@@ -19,6 +19,7 @@ using Bloggle.Results;
 using Bloggle.BusinessLayer;
 using System.Web.Http.Cors;
 using System.Linq;
+using Bloggle.DataAcessLayer;
 
 namespace Bloggle.Controllers
 {
@@ -68,17 +69,38 @@ namespace Bloggle.Controllers
         // GET api/Account/UserInfo
         [HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]
         [Route("UserInfo")]
-        public UserInfoViewModel GetUserInfo()
+        public UserModel GetUserInfo()
         {
             ExternalLoginData externalLogin = ExternalLoginData.FromIdentity(User.Identity as ClaimsIdentity);
-
-            return new UserInfoViewModel
+            UserModel userModel = new UserModel();
+            using (ApplicationDbContext db = new ApplicationDbContext())
             {
-                Email = User.Identity.GetUserName(),
-                HasRegistered = externalLogin == null,
-                LoginProvider = externalLogin != null ? externalLogin.LoginProvider : null,
-                UserId = User.Identity.GetUserId()
-            };
+                var userName = User.Identity.GetUserName();
+                var currentUser = db.Users.FirstOrDefault(u => u.UserName == userName );
+
+                userModel.Id = currentUser.Id;
+                userModel.FirstName = currentUser.FirstName;
+                userModel.LastName = currentUser.LastName;
+                userModel.UserName = currentUser.UserName;
+                userModel.Email = currentUser.Email;
+                userModel.DOB = currentUser.DOB;
+                userModel.PhoneNumber = currentUser.PhoneNumber;
+                userModel.About = currentUser.About;
+                userModel.Twitter = currentUser.Twitter;
+                userModel.Instagram = currentUser.Instagram;
+                userModel.Facebook = currentUser.Facebook;
+            }
+
+            using (BloggleContext context = new BloggleContext())
+            {
+                var media = context.Media.FirstOrDefault(m => m.Type == "dp" && m.CreatedBy == userModel.UserName);
+                if (media != null)
+                    userModel.ProfilePicture = media.Id;
+                else
+                    userModel.ProfilePicture = null;
+            }
+
+            return userModel;
         }
 
         // POST api/Account/Logout
