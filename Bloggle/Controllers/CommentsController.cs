@@ -30,6 +30,23 @@ namespace Bloggle.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No comments available");
         }
 
+        [HttpGet]
+        public HttpResponseMessage FindAllComments(string username)
+        {
+            using (ApplicationDbContext db = new ApplicationDbContext())
+            {
+                string currentUserId = User.Identity.GetUserId();
+                ApplicationUser currentUser = db.Users.FirstOrDefault(x => x.Id == currentUserId);
+                var comments = service.FindAllComments(currentUser.UserName);
+                if (comments.Count > 0)
+                    return Request.CreateResponse(HttpStatusCode.OK, comments);
+                else
+                    return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"No comments found for the user = {currentUser.UserName}");
+            }
+
+        }
+
+
         // GET api/comments/5
         [AllowAnonymous]
         public HttpResponseMessage Get(int id)
@@ -40,6 +57,8 @@ namespace Bloggle.Controllers
             else
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, $"Comment with id={id} not found");
         }
+
+        
 
         // POST api/<controller>
         public HttpResponseMessage Post([FromBody]Comment comment)

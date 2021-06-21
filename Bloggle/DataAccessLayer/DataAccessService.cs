@@ -254,6 +254,12 @@ namespace Bloggle.DataAcessLayer
             return comment;
         }
 
+        public List<Comment> FindAllComments(string username)
+        {
+            var comments = context.Comments.Where(c => c.CreatedBy == username).ToList();
+            return comments;
+        }
+
         public ProcessState AddComment(Comment comment)
         {
             try
