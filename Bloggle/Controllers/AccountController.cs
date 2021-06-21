@@ -29,7 +29,7 @@ namespace Bloggle.Controllers
     {
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
-
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public AccountController()
         {
         }
@@ -67,39 +67,47 @@ namespace Bloggle.Controllers
         public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
 
         // GET api/Account/UserInfo
-        [HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]
+        //[HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]
+        [AllowAnonymous]
         [Route("UserInfo")]
-        public UserModel GetUserInfo()
+        public UserModel GetUserInfo(string userName)
         {
-            ExternalLoginData externalLogin = ExternalLoginData.FromIdentity(User.Identity as ClaimsIdentity);
+            //ExternalLoginData externalLogin = ExternalLoginData.FromIdentity(User.Identity as ClaimsIdentity);
             UserModel userModel = new UserModel();
-            using (ApplicationDbContext db = new ApplicationDbContext())
+            try
             {
-                var userName = User.Identity.GetUserName();
-                var currentUser = db.Users.FirstOrDefault(u => u.UserName == userName );
+                using (ApplicationDbContext db = new ApplicationDbContext())
+                {
+                    //var userName = User.Identity.GetUserName();
+                    var currentUser = db.Users.FirstOrDefault(u => u.UserName == userName);
 
-                userModel.Id = currentUser.Id;
-                userModel.FirstName = currentUser.FirstName;
-                userModel.LastName = currentUser.LastName;
-                userModel.UserName = currentUser.UserName;
-                userModel.Email = currentUser.Email;
-                userModel.DOB = currentUser.DOB;
-                userModel.PhoneNumber = currentUser.PhoneNumber;
-                userModel.About = currentUser.About;
-                userModel.Twitter = currentUser.Twitter;
-                userModel.Instagram = currentUser.Instagram;
-                userModel.Facebook = currentUser.Facebook;
+                    userModel.Id = currentUser.Id;
+                    userModel.FirstName = currentUser.FirstName;
+                    userModel.LastName = currentUser.LastName;
+                    userModel.UserName = currentUser.UserName;
+                    userModel.Email = currentUser.Email;
+                    userModel.DOB = currentUser.DOB;
+                    userModel.PhoneNumber = currentUser.PhoneNumber;
+                    userModel.About = currentUser.About;
+                    userModel.Twitter = currentUser.Twitter;
+                    userModel.Instagram = currentUser.Instagram;
+                    userModel.Facebook = currentUser.Facebook;
+                }
+
+                using (BloggleContext context = new BloggleContext())
+                {
+                    var media = context.Media.FirstOrDefault(m => m.Type == "dp" && m.CreatedBy == userModel.UserName);
+                    if (media != null)
+                        userModel.ProfilePicture = media.Id;
+                    else
+                        userModel.ProfilePicture = null;
+                }
             }
-
-            using (BloggleContext context = new BloggleContext())
+            catch (Exception e)
             {
-                var media = context.Media.FirstOrDefault(m => m.Type == "dp" && m.CreatedBy == userModel.UserName);
-                if (media != null)
-                    userModel.ProfilePicture = media.Id;
-                else
-                    userModel.ProfilePicture = null;
+                log.Error(e.StackTrace);
+                return userModel;
             }
-
             return userModel;
         }
 
