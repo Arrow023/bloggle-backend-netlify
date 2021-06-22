@@ -96,7 +96,9 @@ namespace Bloggle.Controllers
 
                 using (BloggleContext context = new BloggleContext())
                 {
-                    var media = context.Media.FirstOrDefault(m => m.Type == "dp" && m.CreatedBy == userModel.UserName);
+                    var media = context.Media
+                        .OrderByDescending(m=>m.CreatedTime)
+                        .FirstOrDefault(m => m.Type == "dp" && m.CreatedBy == userModel.UserName);
                     if (media != null)
                         userModel.ProfilePicture = media.Id;
                     else
