@@ -21,6 +21,16 @@ namespace Bloggle.Controllers
             service = new DataAccessService();
         }
 
+        [Authorize(Roles ="Admin")]
+        [Route("allblogs")]
+        public HttpResponseMessage GetAllBlogs()
+        {
+            var blogs = service.GetAllBlogs();
+            if (blogs.Count > 0)
+                return Request.CreateResponse(HttpStatusCode.OK, blogs);
+            else
+                return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No blogs available.");
+        }
 
         // GET api/Blog/feature?blogType=<type>
         [AllowAnonymous]

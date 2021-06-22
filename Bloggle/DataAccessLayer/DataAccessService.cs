@@ -47,6 +47,11 @@ namespace Bloggle.DataAcessLayer
             return context.Blogs.Find(blogId);
         }
 
+        public List<Blog> GetAllBlogs()
+        {
+            return context.Blogs.ToList();
+        }
+
         public List<Blog> GetTrendingBlogs(int take = 12)
         {
             var blogs = context.Blogs.OrderByDescending(b => b.CreatedTime)
@@ -312,7 +317,7 @@ namespace Bloggle.DataAcessLayer
                 var comment = context.Comments.Find(commentId);
                 if (comment != null)
                 {
-                    if (isAdmin || (user.UserName == comment.CreatedBy))
+                    if (isAdmin || (user.UserName == comment.CreatedBy) || user.UserName == comment.BlogNavigator.Author)
                     {
                         context.Comments.Remove(comment);
                         int rowsAffected = context.SaveChanges();
