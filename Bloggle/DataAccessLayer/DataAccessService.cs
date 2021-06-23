@@ -98,6 +98,32 @@ namespace Bloggle.DataAcessLayer
             return blogs;
         }
 
+        public ProcessState GiveLike(int blogId)
+        {
+            try
+            {
+                var blog = context.Blogs.Find(blogId);
+                if (blog != null)
+                {
+                    blog.Likes = blog.Likes + 1;
+                    int rowsAffected = context.SaveChanges();
+                    if (rowsAffected > 0)
+                        return ProcessState.Done;
+                    else
+                        return ProcessState.NotDone;
+                }
+                else
+                    return ProcessState.NotDone;
+            }
+            catch (Exception e)
+            {
+                log.Error(e.StackTrace);
+                return ProcessState.TechnicalError;
+            }
+        }
+
+
+
         public Blog UpdateBlog(int blogId, Blog blog)
         {
             try

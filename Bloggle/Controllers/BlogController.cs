@@ -98,6 +98,30 @@ namespace Bloggle.Controllers
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Invalid username");
         }
 
+        [HttpGet]
+        [Route("addlike")]
+        public HttpResponseMessage AddLikes(int blogId)
+        {
+            var status = service.GiveLike(blogId);
+            if (status == ProcessState.Done)
+                return Request.CreateResponse(HttpStatusCode.Created, "Blog liked");
+            else if (status == ProcessState.TechnicalError)
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Failed to add like");
+            else
+                return Request.CreateErrorResponse(HttpStatusCode.NotImplemented, "Could not add like");
+        }
+
+        [AllowAnonymous]
+        [Route("searchBlogs")]
+        public HttpResponseMessage GetAllSearchableBlogs(int categoryId, string searchvalue)
+        {
+            var blogs = service.SearchBlogs(categoryId, searchvalue);
+            if (blogs.Count > 0)
+                return Request.CreateResponse(HttpStatusCode.OK, blogs);
+            else
+                return Request.CreateErrorResponse(HttpStatusCode.NotFound, "No blogs found");
+        }
+
         // GET api/<controller>/5
         [AllowAnonymous]
         public HttpResponseMessage Get(int id)
