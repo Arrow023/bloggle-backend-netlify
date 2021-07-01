@@ -16,7 +16,7 @@ namespace Bloggle.Controllers
     public class MediaController : ApiController
     {
         public DataAccessService service;
-
+        
         public MediaController()
         {
             service = new DataAccessService();
@@ -79,7 +79,7 @@ namespace Bloggle.Controllers
             }
         }
 
-    
+        
         // DELETE api/media/5
         public HttpResponseMessage Delete(int id)
         {

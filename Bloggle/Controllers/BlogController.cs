@@ -7,6 +7,7 @@ using System.Web.Http;
 using Bloggle.DataAcessLayer;
 using Bloggle.BusinessLayer;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Bloggle.Controllers
 {
@@ -172,7 +173,8 @@ namespace Bloggle.Controllers
         // DELETE api/Blog/5
         public HttpResponseMessage Delete(int id)
         {
-            var status = service.DeleteBlog(id);
+            var path = HttpContext.Current.Server.MapPath("~/UserData/");
+            var status = service.DeleteBlog(id,path);
             if (status)
                 return Request.CreateResponse(HttpStatusCode.OK);
             else

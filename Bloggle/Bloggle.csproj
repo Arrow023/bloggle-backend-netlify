@@ -219,6 +219,8 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="BusinessLayer\Blog.cs" />
     <Compile Include="BusinessLayer\Bookmark.cs" />
+    <Compile Include="BusinessLayer\BookmarkBlog.cs" />
+    <Compile Include="BusinessLayer\CarouselBlog.cs" />
     <Compile Include="BusinessLayer\Category.cs" />
     <Compile Include="BusinessLayer\Comment.cs" />
     <Compile Include="BusinessLayer\FAQ.cs" />

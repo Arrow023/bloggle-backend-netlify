@@ -5,7 +5,7 @@ using System.Web;
 using Bloggle.BusinessLayer;
 using System.Data.Entity;
 using Bloggle.Models;
-
+using System.IO;
 namespace Bloggle.DataAcessLayer
 {
     public enum ProcessState
@@ -47,54 +47,121 @@ namespace Bloggle.DataAcessLayer
             return context.Blogs.Find(blogId);
         }
 
-        public List<Blog> GetAllBlogs()
+        public List<CarouselBlog> GetAllBlogs()
         {
-            return context.Blogs.ToList();
+            return context.Blogs
+                .Select(b => new CarouselBlog
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Subtitle = b.Subtitle,
+                    Author = b.Author,
+                    MediaId = b.MediaId,
+                    Category = b.CategoryNavigator.CategoryName,
+                    Likes = b.Likes,
+                    CreatedTime = b.CreatedTime,
+                    LastUpdatedTime = b.LastUpdatedTime
+                }).ToList();
         }
 
-        public List<Blog> GetTrendingBlogs(int take = 12)
+        public List<CarouselBlog> GetTrendingBlogs(int take = 12)
         {
             var blogs = context.Blogs.OrderByDescending(b => b.CreatedTime)
                 .Take(take)
                 .OrderByDescending(b => b.Likes)
-                .ToList();
+                .Select(b => new CarouselBlog
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Subtitle = b.Subtitle,
+                    Author = b.Author,
+                    MediaId = b.MediaId,
+                    Category = b.CategoryNavigator.CategoryName,
+                    Likes = b.Likes,
+                    CreatedTime = b.CreatedTime,
+                    LastUpdatedTime = b.LastUpdatedTime
+                }).ToList();
             return blogs;
         }
 
-        public List<Blog> GetPopularBlogs(int take = 12)
+        public List<CarouselBlog> GetPopularBlogs(int take = 12)
         {
             var blogs = context.Blogs
                 .OrderByDescending(b => b.Likes)
                 .Take(take)
-                .ToList();
+                .Select(b => new CarouselBlog
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Subtitle = b.Subtitle,
+                    Author = b.Author,
+                    MediaId = b.MediaId,
+                    Category = b.CategoryNavigator.CategoryName,
+                    Likes = b.Likes,
+                    CreatedTime = b.CreatedTime,
+                    LastUpdatedTime = b.LastUpdatedTime
+                }).ToList();
             return blogs;
         }
 
-        public List<Blog> GetRecentBlogs(int take = 12)
+        public List<CarouselBlog> GetRecentBlogs(int take = 12)
         {
             var blogs = context.Blogs
                 .OrderByDescending(b => b.CreatedTime)
                 .Take(take)
-                .ToList();
+                .Select(b => new CarouselBlog
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Subtitle = b.Subtitle,
+                    Author = b.Author,
+                    MediaId = b.MediaId,
+                    Category = b.CategoryNavigator.CategoryName,
+                    Likes = b.Likes,
+                    CreatedTime = b.CreatedTime,
+                    LastUpdatedTime = b.LastUpdatedTime
+                }).ToList();
             return blogs;
         }
 
-        public List<Blog> GetCategoryXBlogs(int categoryId, int take = 10)
+        public List<CarouselBlog> GetCategoryXBlogs(int categoryId, int take = 10)
         {
             var blogs = context.Blogs
                 .OrderByDescending(b => b.CreatedTime)
                 .Where(b => b.CategoryNavigator.Id == categoryId)
                 .Take(take)
-                .ToList();
+                .Select(b => new CarouselBlog
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Subtitle = b.Subtitle,
+                    Author = b.Author,
+                    MediaId = b.MediaId,
+                    Category = b.CategoryNavigator.CategoryName,
+                    Likes = b.Likes,
+                    CreatedTime = b.CreatedTime,
+                    LastUpdatedTime = b.LastUpdatedTime
+                }).ToList();
             return blogs;
         }
 
-        public List<Blog> GetBlogsOfUser(string userName)
+        public List<CarouselBlog> GetBlogsOfUser(string userName)
         {
             var blogs = context.Blogs
                 .OrderByDescending(b => b.CreatedTime)
                 .Where(b => b.Author == userName)
-                .ToList();
+                .Select(b => new CarouselBlog
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    Subtitle = b.Subtitle,
+                    Author = b.Author,
+                    MediaId = b.MediaId,
+                    Category = b.CategoryNavigator.CategoryName,
+                    Likes = b.Likes,
+                    CreatedTime = b.CreatedTime,
+                    LastUpdatedTime = b.LastUpdatedTime
+                }).ToList();
             return blogs;
         }
 
@@ -152,7 +219,7 @@ namespace Bloggle.DataAcessLayer
             
         }
 
-        public bool DeleteBlog(int blogId)
+        public bool DeleteBlog(int blogId, string path)
         {
             try
             {
@@ -165,6 +232,8 @@ namespace Bloggle.DataAcessLayer
                         var medias = context.Media.Where(m => m.Id == blog.MediaId);
                         foreach (var item in medias)
                         {
+                            var currentfile = path+item.Location;
+                            File.Delete(currentfile);
                             context.Media.Remove(item);
                         }
                     }
@@ -271,6 +340,10 @@ namespace Bloggle.DataAcessLayer
             
         }
 
+        public List<Medium> GetAllMedia()
+        {
+            return context.Media.ToList();
+        }
 
         // Data Access for Categories Controller Begins
         public List<Comment> FindAllComments()
@@ -519,9 +592,23 @@ namespace Bloggle.DataAcessLayer
 
         // Data Access for Bookmark controller Begins here
 
-        public List<Bookmark> GetBookmarks(string userName)
+        public List<BookmarkBlog> GetBookmarks(string userName)
         {
-            var bookmarks = context.Bookmarks.Where(b => b.UserId == userName).ToList();
+            var bookmarks = context.Bookmarks
+                .Where(b => b.UserId == userName)
+                .Select(b => new BookmarkBlog
+                {
+                    Id = b.Id,
+                    BlogId = b.BlogId,
+                    Title = b.BlogNavigator.Title,
+                    Subtitle = b.BlogNavigator.Subtitle,
+                    Author = b.BlogNavigator.Author,
+                    MediaId = b.BlogNavigator.MediaId,
+                    Category = b.BlogNavigator.CategoryNavigator.CategoryName,
+                    Likes = b.BlogNavigator.Likes,
+                    CreatedTime = b.BlogNavigator.CreatedTime,
+                    LastUpdatedTime = b.BlogNavigator.LastUpdatedTime
+                }).ToList();
             return bookmarks;
         }
 
