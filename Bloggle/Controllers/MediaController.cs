@@ -59,11 +59,14 @@ namespace Bloggle.Controllers
 					if (httpRequest.Files.Count > 0)
 					{
 						var postedFile = httpRequest.Files["upload_file"];
-						var filePath = HostingEnvironment.MapPath("~/App_Data/" + currentUser.UserName + "__" + postedFile.FileName);
+						//var filePath = HostingEnvironment.MapPath("~/App_Data/" + currentUser.UserName + "__" + postedFile.FileName);
+						var extension = Path.GetExtension(postedFile.FileName);
+						var filename = Guid.NewGuid().ToString() + extension;
+						var filePath = HostingEnvironment.MapPath("~/App_Data/" + filename);
 						postedFile.SaveAs(filePath);
 
 						medium.Type = mediaType;
-						medium.Location = currentUser.UserName + "__" + postedFile.FileName;
+						medium.Location = filename;
 						medium.CreatedBy = currentUser.UserName;
 						medium.CreatedTime = DateTime.Now;
 
