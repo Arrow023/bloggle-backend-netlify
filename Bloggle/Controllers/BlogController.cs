@@ -173,7 +173,7 @@ namespace Bloggle.Controllers
         // DELETE api/Blog/5
         public HttpResponseMessage Delete(int id)
         {
-            var path = HttpContext.Current.Server.MapPath("~/UserData/");
+            var path = HttpContext.Current.Server.MapPath("~/App_Data/");
             var status = service.DeleteBlog(id,path);
             if (status)
                 return Request.CreateResponse(HttpStatusCode.OK);
