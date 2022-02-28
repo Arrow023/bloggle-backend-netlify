@@ -28,6 +28,7 @@ namespace Bloggle.BusinessLayer
         public DateTime CreatedTime { get; set; }
         [Required]
         public DateTime LastUpdatedTime { get; set; }
+        public int Views { get; set; } = 0;
 
         [ForeignKey("MediaId")]
         public virtual Medium MediaNavigator { get; set; }

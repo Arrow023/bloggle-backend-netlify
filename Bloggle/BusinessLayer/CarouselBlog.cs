@@ -14,6 +14,7 @@ namespace Bloggle.BusinessLayer
         public int? MediaId { get; set; }
         public string Category {get;set;}
         public int Likes { get; set; }
+        public int Views { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime LastUpdatedTime { get; set; }
     }

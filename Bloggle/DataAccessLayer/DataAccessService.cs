@@ -60,7 +60,8 @@ namespace Bloggle.DataAcessLayer
                     Category = b.CategoryNavigator.CategoryName,
                     Likes = b.Likes,
                     CreatedTime = b.CreatedTime,
-                    LastUpdatedTime = b.LastUpdatedTime
+                    LastUpdatedTime = b.LastUpdatedTime,
+                    Views = b.Views
                 }).ToList();
         }
 
@@ -79,7 +80,8 @@ namespace Bloggle.DataAcessLayer
                     Category = b.CategoryNavigator.CategoryName,
                     Likes = b.Likes,
                     CreatedTime = b.CreatedTime,
-                    LastUpdatedTime = b.LastUpdatedTime
+                    LastUpdatedTime = b.LastUpdatedTime,
+                    Views = b.Views
                 }).ToList();
             return blogs;
         }
@@ -99,7 +101,8 @@ namespace Bloggle.DataAcessLayer
                     Category = b.CategoryNavigator.CategoryName,
                     Likes = b.Likes,
                     CreatedTime = b.CreatedTime,
-                    LastUpdatedTime = b.LastUpdatedTime
+                    LastUpdatedTime = b.LastUpdatedTime,
+                    Views = b.Views
                 }).ToList();
             return blogs;
         }
@@ -119,7 +122,8 @@ namespace Bloggle.DataAcessLayer
                     Category = b.CategoryNavigator.CategoryName,
                     Likes = b.Likes,
                     CreatedTime = b.CreatedTime,
-                    LastUpdatedTime = b.LastUpdatedTime
+                    LastUpdatedTime = b.LastUpdatedTime,
+                    Views = b.Views
                 }).ToList();
             return blogs;
         }
@@ -140,7 +144,8 @@ namespace Bloggle.DataAcessLayer
                     Category = b.CategoryNavigator.CategoryName,
                     Likes = b.Likes,
                     CreatedTime = b.CreatedTime,
-                    LastUpdatedTime = b.LastUpdatedTime
+                    LastUpdatedTime = b.LastUpdatedTime,
+                    Views = b.Views
                 }).ToList();
             return blogs;
         }
@@ -160,7 +165,8 @@ namespace Bloggle.DataAcessLayer
                     Category = b.CategoryNavigator.CategoryName,
                     Likes = b.Likes,
                     CreatedTime = b.CreatedTime,
-                    LastUpdatedTime = b.LastUpdatedTime
+                    LastUpdatedTime = b.LastUpdatedTime,
+                    Views = b.Views
                 }).ToList();
             return blogs;
         }
@@ -189,7 +195,30 @@ namespace Bloggle.DataAcessLayer
             }
         }
 
+        public ProcessState AddViews(int blogId)
+        {
+            try
+            {
+                var result = context.Blogs.Find(blogId);
+                if (result != null)
+                {
+                    result.Views = result.Views + 1;
+                    int rowsAffected = context.SaveChanges();
+                    if (rowsAffected > 0)
+                        return ProcessState.Done;
+                    else
+                        return ProcessState.NotDone;
+                }
+                else
+                    return ProcessState.NotDone;
+            }
+            catch (Exception e)
+            {
+                log.Error(e.Message);
+                return ProcessState.TechnicalError;
+            }
 
+        }
 
         public Blog UpdateBlog(int blogId, Blog blog)
         {
@@ -659,5 +688,65 @@ namespace Bloggle.DataAcessLayer
                 return ProcessState.TechnicalError;
             }
         }
+
+
+
+        //Reports Section
+        public List<Report> GetReports()
+        {
+            return context.Reports.ToList();
+        }
+
+        public ProcessState AddReport(Report report)
+        {
+            try
+            {
+                var reportInDb = context.Reports.Where(r => r.ContentId == report.ContentId
+                                                        && r.ReportType == report.ReportType
+                                                        && r.ContentType == report.ContentType).FirstOrDefault();
+                if (reportInDb != null)
+                {
+                    reportInDb.ReportedCount += 1;
+                }
+                else
+                    context.Reports.Add(report);
+                int rowsAffected = context.SaveChanges();
+                if (rowsAffected > 0)
+                    return ProcessState.Done;
+                else
+                    return ProcessState.NotDone;
+            }
+            catch (Exception e)
+            {
+                log.Error(e.StackTrace);
+                return ProcessState.TechnicalError;
+            }
+        }
+
+        public ProcessState DeleteReport(int reportId)
+        {
+            try
+            {
+                var report = context.Reports.Find(reportId);
+                if (report != null)
+                {
+                    context.Reports.Remove(report);
+                    int rowsAffected = context.SaveChanges();
+                    if (rowsAffected > 0)
+                        return ProcessState.Done;
+                    else
+                        return ProcessState.NotDone;
+                }
+                else
+                    return ProcessState.NotDone;
+            }
+            catch (Exception e)
+            {
+                log.Error(e.StackTrace);
+                return ProcessState.TechnicalError;
+            }
+        }
+
+
     }
 }

@@ -224,6 +224,7 @@
     <Compile Include="BusinessLayer\Comment.cs" />
     <Compile Include="BusinessLayer\FAQ.cs" />
     <Compile Include="BusinessLayer\Medium.cs" />
+    <Compile Include="BusinessLayer\Report.cs" />
     <Compile Include="BusinessLayer\UserModel.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BlogController.cs" />
@@ -232,6 +233,7 @@
     <Compile Include="Controllers\CommentsController.cs" />
     <Compile Include="Controllers\FAQController.cs" />
     <Compile Include="Controllers\MediaController.cs" />
+    <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="DataAccessLayer\BloggleContext.cs" />
     <Compile Include="DataAccessLayer\DataAccessService.cs" />
     <Compile Include="Global.asax.cs">
@@ -240,6 +242,14 @@
     <Compile Include="Migrations\202106141008528_InitialSetup.cs" />
     <Compile Include="Migrations\202106141008528_InitialSetup.Designer.cs">
       <DependentUpon>202106141008528_InitialSetup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202202270712571_ReportsToDB.cs" />
+    <Compile Include="Migrations\202202270712571_ReportsToDB.designer.cs">
+      <DependentUpon>202202270712571_ReportsToDB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202202271432551_ViewColumnAddedToBlogsTable.cs" />
+    <Compile Include="Migrations\202202271432551_ViewColumnAddedToBlogsTable.designer.cs">
+      <DependentUpon>202202271432551_ViewColumnAddedToBlogsTable.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
@@ -357,6 +367,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202106141008528_InitialSetup.resx">
       <DependentUpon>202106141008528_InitialSetup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202202270712571_ReportsToDB.resx">
+      <DependentUpon>202202270712571_ReportsToDB.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202202271432551_ViewColumnAddedToBlogsTable.resx">
+      <DependentUpon>202202271432551_ViewColumnAddedToBlogsTable.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
