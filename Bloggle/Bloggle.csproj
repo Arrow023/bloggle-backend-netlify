@@ -333,7 +333,12 @@
     <Content Include="logs\Bloggle.log">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Properties\PublishProfiles\bloggle-001-site1 - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\bloggle-001-site1 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\bloggle001-001-site1 - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\bloggle001-001-site1 - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\BloggleBackendAzure - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <None Include="Scripts\jquery-3.6.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.6.0.js" />
