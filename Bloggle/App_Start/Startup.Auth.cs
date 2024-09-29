@@ -60,11 +60,11 @@ namespace Bloggle
             //    appId: "1436606503347895",
             //    appSecret: "3ae072830a483f0f7ccd02fd8be24cca");
 
-            //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
-            //{
-            //    ClientId = "",
-            //    ClientSecret = ""
-            //});
+            app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
+            {
+                ClientId = "1097842679595-hetnuckn520oimudgk5u2dk20tai082r.apps.googleusercontent.com",
+                ClientSecret = "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"
+            });
         }
     }
 }
