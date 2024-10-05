@@ -23,6 +23,11 @@ using Bloggle.DataAcessLayer;
 using System.Web.Hosting;
 using System.Net;
 using System.IO;
+using System.Configuration;
+using Google.Apis.Auth;
+using System.Text;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
 
 namespace Bloggle.Controllers
 {
@@ -33,6 +38,7 @@ namespace Bloggle.Controllers
 		private const string LocalLoginProvider = "Local";
 		private ApplicationUserManager _userManager;
 		private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+		private string _googleClientID = ConfigurationManager.AppSettings["GoogleClientId"].ToString();
 		public AccountController()
 		{
 		}
@@ -175,6 +181,46 @@ namespace Bloggle.Controllers
 			response.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
 			response.Content.Headers.ContentDisposition.FileName = "Bloggle.log";
 			return response;
+		}
+
+		[AllowAnonymous]
+		[Route("loginwithgoogle")]
+		public async Task<IHttpActionResult> GetLoginUsingGoogle(string accessToken)
+		{
+			var settings = new GoogleJsonWebSignature.ValidationSettings
+			{
+				Audience = new List<string> { _googleClientID }
+			};
+			var payload = await GoogleJsonWebSignature.ValidateAsync(accessToken, settings);
+            if (payload == null)
+            {
+				return InternalServerError();
+            }
+
+			var user = UserManager.FindByEmail(payload.Email);
+			if(user == null) //new user
+			{
+                var newUser = new ApplicationUser()
+                {
+                    UserName = payload.GivenName,
+                    FirstName = payload.GivenName,
+                    LastName = payload.FamilyName,
+                    DOB = DateTime.Now,
+                    Email = payload.Email
+                };
+				var hashedPassword = GetHashedPassword(payload.GivenName, payload.Email);
+
+                IdentityResult result = await UserManager.CreateAsync(newUser, hashedPassword);
+
+                if (!result.Succeeded)
+                {
+                    return GetErrorResult(result);
+                }
+                var addToRoleResult = await UserManager.AddToRoleAsync(newUser.Id, "Blogger");
+            }
+
+			return await AutoLogin(payload.GivenName, payload.Email);
+
 		}
 
 		// POST api/Account/ChangePassword
@@ -519,7 +565,62 @@ namespace Bloggle.Controllers
 			return null;
 		}
 
-		private class ExternalLoginData
+		private string GetHashedPassword(string username, string email)
+		{
+			string result;
+			using (MD5 hash = MD5.Create())
+			{
+				result = String.Join
+				(
+					"",
+					from ba in hash.ComputeHash
+					(
+						Encoding.UTF8.GetBytes(username + email)
+					)
+					select ba.ToString("x2")
+				);
+			}
+			
+			return result+"A#B";
+		}
+
+		private async Task<IHttpActionResult> AutoLogin(string username, string email)
+		{
+            using (var client = new HttpClient())
+            {
+                var baseUrl = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Host + ":" + HttpContext.Current.Request.Url.Port;
+                // Set the base address for the API
+                client.BaseAddress = new Uri(baseUrl);
+
+                // Prepare data as key-value pairs
+                var formData = new List<KeyValuePair<string, string>>
+                    {
+                        new KeyValuePair<string, string>("username", username),
+                        new KeyValuePair<string, string>("password", GetHashedPassword(username,email)),
+                        new KeyValuePair<string, string>("grant_type", "password")
+                    };
+
+                // Encode data as application/x-www-form-urlencoded
+                var content = new FormUrlEncodedContent(formData);
+                HttpResponseMessage response = await client.PostAsync(baseUrl + "/token", content);
+
+                // Check the response status code
+                if (response.IsSuccessStatusCode)
+                {
+                    // Read the response content
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var jsonObject = JsonConvert.DeserializeObject<dynamic>(responseData);
+                    return Ok(jsonObject);
+                }
+                else
+                {
+                    return InternalServerError();
+                }
+            }
+        }
+
+
+        private class ExternalLoginData
 		{
 			public string LoginProvider { get; set; }
 			public string ProviderKey { get; set; }
