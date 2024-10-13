@@ -18,6 +18,7 @@ namespace Bloggle.Migrations
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
             //  to avoid creating duplicate seed data.
+
             context.Categories.Add(new BusinessLayer.Category { CategoryName= "Lifestyle" });
             context.Categories.Add(new BusinessLayer.Category { CategoryName= "Food & Cooking" });
             context.Categories.Add(new BusinessLayer.Category { CategoryName= "Travel" });
@@ -39,6 +40,7 @@ namespace Bloggle.Migrations
             context.FAQs.Add(new BusinessLayer.FAQ { Question = "How to read a blog?", Solution = "Click on the blog title or image to open and read the full content of the blog post.", Vote = 50 });
             context.FAQs.Add(new BusinessLayer.FAQ { Question = "How to create a categorized blog?", Solution = "While creating a blog, choose a category from the dropdown menu before submitting the form.", Vote = 4 });
             context.FAQs.Add(new BusinessLayer.FAQ { Question = "How to like a blog?", Solution = "Click on the 'Like' button below the blog post to show your appreciation.", Vote = 1 });
+
 
 
         }

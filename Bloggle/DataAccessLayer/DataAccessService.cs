@@ -23,6 +23,11 @@ namespace Bloggle.DataAcessLayer
             context = new BloggleContext();            
         }
 
+        public string GetConfiguration(string name)
+        {
+            return context.Configurations.FirstOrDefault(s => s.Name == name).Value;
+        }
+
         public Blog CreateBlog(Blog blog)
         {
             try

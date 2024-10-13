@@ -38,7 +38,7 @@ namespace Bloggle.Controllers
 		private const string LocalLoginProvider = "Local";
 		private ApplicationUserManager _userManager;
 		private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-		private string _googleClientID = ConfigurationManager.AppSettings["GoogleClientId"].ToString();
+		private string _googleClientID = new DataAccessService().GetConfiguration("GoogleClientId");
 		public AccountController()
 		{
 		}

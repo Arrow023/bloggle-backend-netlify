@@ -11,29 +11,41 @@ using System.Net.Http;
 using System.Web;
 using System.Web.Hosting;
 using System.Web.Http;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using System.Configuration;
+using System.Management;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace Bloggle.Controllers
 {
 	public class MediaController : ApiController
 	{
 		public DataAccessService service;
+		private Cloudinary _cloudinary;
+		
 		
 		public MediaController()
 		{
 			service = new DataAccessService();
-		}
+            _cloudinary = new Cloudinary(service.GetConfiguration("Cloudinary"));
+            _cloudinary.Api.Secure = true;
+        }
 		
 		// GET api/<controller>/5
 		[AllowAnonymous]
-		public HttpResponseMessage Get(int id)
+		public async Task<HttpResponseMessage> Get(int id)
 		{
 			var media = service.FindMedia(id);
 			if (media != null)
 			{
 				HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);
-				var path = HostingEnvironment.MapPath("~/App_Data/");
-				response.Content = new StreamContent(new FileStream(path+media.Location, FileMode.Open, FileAccess.Read));
-				response.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+				var httpClient = new HttpClient();
+				var data = await httpClient.GetAsync(media.Location.ToString());
+                byte[] contentBytes = await data.Content.ReadAsByteArrayAsync();
+				response.Content = new ByteArrayContent(contentBytes);
+                response.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
 				response.Content.Headers.ContentDisposition.FileName = media.Location;
 				return response;
 			}
@@ -48,40 +60,52 @@ namespace Bloggle.Controllers
 		{
 			try
 			{
-				using (ApplicationDbContext db = new ApplicationDbContext())
+				string base64File = null;
+                if (HttpContext.Current.Request.Files["upload_file"] == null)
+                {
+                    return Request.CreateResponse(HttpStatusCode.BadRequest);
+                }
+
+                HttpPostedFile uploadedFile = HttpContext.Current.Request.Files["upload_file"];
+                using (var binaryReader = new BinaryReader(uploadedFile.InputStream))
+                {
+                    byte[] fileBytes = binaryReader.ReadBytes(uploadedFile.ContentLength);
+                    string base64String = Convert.ToBase64String(fileBytes);
+                    string mimeType = uploadedFile.ContentType;
+                    base64File = $"data:{mimeType};base64,{base64String}";
+                }
+                var uploadParams = new ImageUploadParams()
+				{
+					File = new FileDescription(base64File),
+					UseFilename = true,
+					UniqueFilename = false,
+					Overwrite = true
+				};
+                var uploadResult = _cloudinary.Upload(uploadParams);
+				var cloudinaryJSON = JsonConvert.DeserializeObject<CloudinaryJSON>(uploadResult.JsonObj.ToString());
+				if (uploadResult == null)
+				{
+					return Request.CreateErrorResponse(HttpStatusCode.NotImplemented, "Media Not created");
+                }
+
+                using (ApplicationDbContext db = new ApplicationDbContext())
 				{
 					string currentUserId = User.Identity.GetUserId();
-					bool isAdmin = User.IsInRole("Admin");
 					ApplicationUser currentUser = db.Users.FirstOrDefault(x => x.Id == currentUserId);
 					Medium medium = new Medium();
-					var httpRequest = HttpContext.Current.Request;
-					var mediaType = httpRequest.Form["mediaType"];
-					if (httpRequest.Files.Count > 0)
-					{
-						var postedFile = httpRequest.Files["upload_file"];
-						//var filePath = HostingEnvironment.MapPath("~/App_Data/" + currentUser.UserName + "__" + postedFile.FileName);
-						var extension = Path.GetExtension(postedFile.FileName);
-						var filename = Guid.NewGuid().ToString() + extension;
-						var filePath = HostingEnvironment.MapPath("~/App_Data/" + filename);
-						postedFile.SaveAs(filePath);
+					
+					medium.Type = cloudinaryJSON.Format;
+					medium.Location = cloudinaryJSON.SecureUrl;
+					medium.CreatedBy = currentUser.UserName;
+					medium.CreatedTime = DateTime.Now;
 
-						medium.Type = mediaType;
-						medium.Location = filename;
-						medium.CreatedBy = currentUser.UserName;
-						medium.CreatedTime = DateTime.Now;
-
-						var status = service.AddMedia(medium);
-						if (status == ProcessState.Done)
-							return Request.CreateResponse(HttpStatusCode.Created, medium);
-						else if (status == ProcessState.TechnicalError)
-							return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Failed to create a new media");
-						else
-							return Request.CreateErrorResponse(HttpStatusCode.NotImplemented, "Media Not created");
-					}
+					var status = service.AddMedia(medium);
+					if (status == ProcessState.Done)
+						return Request.CreateResponse(HttpStatusCode.Created, medium);
+					else if (status == ProcessState.TechnicalError)
+						return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Failed to create a new media");
 					else
-					{
-						return Request.CreateResponse(HttpStatusCode.BadRequest);
-					}
+						return Request.CreateErrorResponse(HttpStatusCode.NotImplemented, "Media Not created");
 				}
 			}
 			catch(Exception e)

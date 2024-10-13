@@ -20,5 +20,7 @@ namespace Bloggle.DataAcessLayer
         public virtual DbSet<FAQ> FAQs { get; set; }
         public virtual DbSet<Medium> Media { get; set; }
         public virtual DbSet<Report> Reports { get; set; }
+        public virtual DbSet<Configuration> Configurations { get; set; }
+
     }
 }
